@@ -59,9 +59,13 @@ class Trainer:
     def _load_robot(self):
         self._robot = simulation.reset(self._scene, self.robot)
 
-    def train(self, output, chunk_length=3, num_chunk=50, **kwargs):
-        trained = trainer.train(self._scene, self._motion, self._robot,
-                                chunk_length, num_chunk, **kwargs)
+    def train(self, output, **kwargs):
+        def make_scene(_):
+            gui_client = BulletClient(connection_mode=pybullet.DIRECT)
+            scene = Scene(self.timestep, self.frame_skip, client=gui_client)
+            robot = simulation.reset(scene, self.robot)
+            return scene, robot
+        trained = trainer.train(self._motion, make_scene, **kwargs)
         trained.dump(output)
 
     def preview(self):
